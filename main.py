@@ -1,21 +1,28 @@
+from PIL import Image, ImageEnhance
 
-from PIL import Image
-
-def zoom_and_crop(image_path, zoom_ratio, crop_ratio):
-    # Open the image
+def zoom_and_crop(image_path, zoom_ratio, crop_ratio, brightness_factor=1.0, contrast_factor=1.0):
+   
     image = Image.open(image_path)
 
-    # Get the dimensions of the original image
+
+    enhancer = ImageEnhance.Brightness(image)
+    image = enhancer.enhance(brightness_factor)
+
+  
+    enhancer = ImageEnhance.Contrast(image)
+    image = enhancer.enhance(contrast_factor)
+
+   
     width, height = image.size
 
-    # Calculate the new dimensions after zooming
+    
     new_width = int(width * zoom_ratio)
     new_height = int(height * zoom_ratio)
 
-    # Resize the image to the new dimensions
+  
     zoomed_image = image.resize((new_width, new_height))
 
-    # Calculate the cropping box
+    
     crop_width = int(new_width * crop_ratio)
     crop_height = int(new_height * crop_ratio)
     left = (new_width - crop_width) // 2
@@ -24,17 +31,18 @@ def zoom_and_crop(image_path, zoom_ratio, crop_ratio):
     bottom = top + crop_height
     crop_box = (left, top, right, bottom)
 
-    # Crop the image
+    
     cropped_image = zoomed_image.crop(crop_box)
 
-    # Display or save the cropped image
     cropped_image.show()  # To display the image
-    # cropped_image.save("cropped_image.jpg")  # To save the image
+    # cropped_image.save("cropped_image.jpg")  
 
-# Get input from the user
-image_path = input("Enter the path to the input image: ")
+
+image_path = input("Enter the path to the input image:E://Swopner4-1//The_ashes.jpg ")
 zoom_ratio = float(input("Enter the zoom ratio (1.0 means no zoom): "))
 crop_ratio = float(input("Enter the crop ratio (0.0 means no crop): "))
+brightness_factor = float(input("Enter the brightness factor (1.0 means no change): "))
+contrast_factor = float(input("Enter the contrast factor (1.0 means no change): "))
 
-# Call the function with user input
-zoom_and_crop(image_path, zoom_ratio, crop_ratio)
+
+zoom_and_crop(image_path, zoom_ratio, crop_ratio, brightness_factor, contrast_factor)
