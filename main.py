@@ -1,48 +1,99 @@
-from PIL import Image, ImageEnhance
+import tkinter as tk
+from tkinter import filedialog, Scale, messagebox
+from PIL import Image, ImageTk, ImageEnhance, ImageOps
+from collections import deque
 
-def zoom_and_crop(image_path, zoom_ratio, crop_ratio, brightness_factor=1.0, contrast_factor=1.0):
-   
-    image = Image.open(image_path)
+class PhotoEditorApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Photo Editor")
 
+        self.canvas = tk.Canvas(self.root, width=500, height=500)
+        self.canvas.pack()
 
-    enhancer = ImageEnhance.Brightness(image)
-    image = enhancer.enhance(brightness_factor)
+        self.menu = tk.Menu(self.root)
+        self.root.config(menu=self.menu)
 
-  
-    enhancer = ImageEnhance.Contrast(image)
-    image = enhancer.enhance(contrast_factor)
+        self.file_menu = tk.Menu(self.menu)
+        self.menu.add_cascade(label="File", menu=self.file_menu)
+        self.file_menu.add_command(label="Open", command=self.open_image)
+        self.file_menu.add_command(label="Save", command=self.save_image)
 
-   
-    width, height = image.size
+        self.edit_menu = tk.Menu(self.menu)
+        self.menu.add_cascade(label="Edit", menu=self.edit_menu)
+        self.edit_menu.add_command(label="Crop", command=self.crop_image)
+        self.edit_menu.add_command(label="Rotate", command=self.rotate_image)
 
-    
-    new_width = int(width * zoom_ratio)
-    new_height = int(height * zoom_ratio)
+        self.brightness_scale = Scale(self.root, label="Brightness", from_=0, to=200, orient=tk.HORIZONTAL, command=self.adjust_brightness)
+        self.brightness_scale.pack()
 
-  
-    zoomed_image = image.resize((new_width, new_height))
+        self.contrast_scale = Scale(self.root, label="Contrast", from_=0, to=200, orient=tk.HORIZONTAL, command=self.adjust_contrast)
+        self.contrast_scale.pack()
 
-    
-    crop_width = int(new_width * crop_ratio)
-    crop_height = int(new_height * crop_ratio)
-    left = (new_width - crop_width) // 2
-    top = (new_height - crop_height) // 2
-    right = left + crop_width
-    bottom = top + crop_height
-    crop_box = (left, top, right, bottom)
+        self.image = None
+        self.image_history = deque(maxlen=10)  # Store a history of up to 10 images
+        self.current_index = -1  # Index for undo/redo
 
-    
-    cropped_image = zoomed_image.crop(crop_box)
+    def open_image(self):
+        file_path = filedialog.askopenfilename()
+        if file_path:
+            self.image = Image.open(file_path)
+            self.image_history.append(self.image.copy())  # Save a copy of the original image
+            self.current_index = len(self.image_history) - 1
+            self.display_image()
 
-    cropped_image.show()  # To display the image
-    # cropped_image.save("cropped_image.jpg")  
+    def save_image(self):
+        if self.image:
+            file_path = filedialog.asksaveasfilename(defaultextension=".jpg")
+            if file_path:
+                self.image.save(file_path)
 
+    def display_image(self):
+        if self.image:
+            self.photo = ImageTk.PhotoImage(self.image)
+            self.canvas.create_image(0, 0, anchor=tk.NW, image=self.photo)
 
-image_path = input("Enter the path to the input image:E://Swopner4-1//The_ashes.jpg ")
-zoom_ratio = float(input("Enter the zoom ratio (1.0 means no zoom): "))
-crop_ratio = float(input("Enter the crop ratio (0.0 means no crop): "))
-brightness_factor = float(input("Enter the brightness factor (1.0 means no change): "))
-contrast_factor = float(input("Enter the contrast factor (1.0 means no change): "))
+    def crop_image(self):
+        if self.image:
+            messagebox.showinfo("Crop", "Crop functionality will be added in future updates.")
 
+    def rotate_image(self):
+        if self.image:
+            messagebox.showinfo("Rotate", "Rotate functionality will be added in future updates.")
 
-zoom_and_crop(image_path, zoom_ratio, crop_ratio, brightness_factor, contrast_factor)
+    def adjust_brightness(self, brightness):
+        if self.image:
+            brightness_factor = float(brightness) / 100.0
+            enhanced_image = ImageEnhance.Brightness(self.image_history[self.current_index]).enhance(brightness_factor)
+            self.image = enhanced_image
+            self.display_image()
+
+    def adjust_contrast(self, contrast):
+        if self.image:
+            contrast_factor = float(contrast) / 100.0
+            enhanced_image = ImageEnhance.Contrast(self.image_history[self.current_index]).enhance(contrast_factor)
+            self.image = enhanced_image
+            self.display_image()
+
+    def undo(self):
+        if len(self.image_history) > 1 and self.current_index > 0:
+            self.current_index -= 1
+            self.image = self.image_history[self.current_index].copy()
+            self.display_image()
+        else:
+            messagebox.showinfo("Undo", "Cannot undo further.")
+
+    def redo(self):
+        if len(self.image_history) > 1 and self.current_index < len(self.image_history) - 1:
+            self.current_index += 1
+            self.image = self.image_history[self.current_index].copy()
+            self.display_image()
+        else:
+            messagebox.showinfo("Redo", "Cannot redo further.")
+
+# Create a Tkinter application instance
+root = tk.Tk()
+app = PhotoEditorApp(root)
+
+# Start the Tkinter event loop
+root.mainloop()
