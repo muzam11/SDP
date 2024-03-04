@@ -81,7 +81,7 @@ class PhotoEditorApp:
             self.image = self.image_history[self.current_index].copy()
             self.display_image()
         else:
-            messagebox.showinfo("Undo", "Cannot undo further.")
+            messagebox.showinfo("Undo", "wait for next update")
 
     def redo(self):
         if len(self.image_history) > 1 and self.current_index < len(self.image_history) - 1:
@@ -89,7 +89,7 @@ class PhotoEditorApp:
             self.image = self.image_history[self.current_index].copy()
             self.display_image()
         else:
-            messagebox.showinfo("Redo", "Cannot redo further.")
+            messagebox.showinfo("Redo", "wait for next update")
 
 # Create a Tkinter application instance
 root = tk.Tk()
