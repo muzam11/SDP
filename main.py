@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import filedialog, Scale, messagebox
-from PIL import Image, ImageTk, ImageEnhance, ImageOps
+from PIL import Image, ImageTk, ImageEnhance
 from collections import deque
+from login import start_login
 
 class PhotoEditorApp:
     def __init__(self, root):
@@ -75,25 +76,13 @@ class PhotoEditorApp:
             self.image = enhanced_image
             self.display_image()
 
-    def undo(self):
-        if len(self.image_history) > 1 and self.current_index > 0:
-            self.current_index -= 1
-            self.image = self.image_history[self.current_index].copy()
-            self.display_image()
-        else:
-            messagebox.showinfo("Undo", "wait for next update")
+    def start_application(self):
+        self.root.mainloop()
 
-    def redo(self):
-        if len(self.image_history) > 1 and self.current_index < len(self.image_history) - 1:
-            self.current_index += 1
-            self.image = self.image_history[self.current_index].copy()
-            self.display_image()
-        else:
-            messagebox.showinfo("Redo", "wait for next update")
+def start_application():
+    root = tk.Tk()
+    app = PhotoEditorApp(root)
+    app.start_application()
 
-# Create a Tkinter application instance
-root = tk.Tk()
-app = PhotoEditorApp(root)
-
-# Start the Tkinter event loop
-root.mainloop()
+if __name__ == "__main__":
+    start_login()
